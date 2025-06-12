@@ -13,7 +13,8 @@
 running = True
 class Piece: 
     def __init__ (self, color):
-        self.color = color 
+        self.color = color
+        self.has_moved = False
 
 class Pawn(Piece): 
     def __init__(self, color):
@@ -97,8 +98,10 @@ class King(Piece):
     def __init__(self, color):
         super().__init__(color)
         
-    def get_moves(self, board, r, c):
+    def get_moves(self, board, r, c, _is_checking_attack=False):
         moves = []
+        
+        enemy_color = 'black' if self.color == 'white' else 'white'
         # Vua đi 1 ô mọi hướng  tính nhập thành)
         dirs = [(-1, 0), (1, 0), (0, -1), (0, 1), (-1, -1), (-1, 1), (1, -1), (1, 1)]
         
@@ -108,9 +111,31 @@ class King(Piece):
                 target = board.board[nr][nc]
                 if target is None or target.color != self.color:
                     moves.append((nr, nc))
-            
-        return moves
+                    
+        # --- LOGIC NHẬP THÀNH ---
+        if not _is_checking_attack and not self.has_moved and not board.is_in_check(self.color):
+        
+        # 1. Nhập thành cánh Vua (bên phải)
+            rook_right = board.board[r][7]
+            if isinstance(rook_right, Rook) and not rook_right.has_moved:
+            # Kiểm tra các ô ở giữa có trống không
+                if board.board[r][5] is None and board.board[r][6] is None:
+                # Kiểm tra các ô Vua đi qua có bị tấn công không
+                    if not board.is_square_attacked((r, 5), enemy_color) and \
+                        not board.is_square_attacked((r, 6), enemy_color):
+                        moves.append((r, 6))
 
+        # 2. Nhập thành cánh Hậu (bên trái)
+            rook_left = board.board[r][0]
+            if isinstance(rook_left, Rook) and not rook_left.has_moved:
+            # Kiểm tra các ô ở giữa có trống không
+                if board.board[r][1] is None and board.board[r][2] is None and board.board[r][3] is None:
+                # Kiểm tra các ô Vua đi qua có bị tấn công không
+                    if not board.is_square_attacked((r, 2), enemy_color) and \
+                        not board.is_square_attacked((r, 3), enemy_color):
+                        moves.append((r, 2))
+        
+        return moves
 class Queen (Piece):
     def __init__ (self,color):
         super(). __init__(color)
@@ -151,29 +176,59 @@ class Board:
                     return (r, c)
         return None
     
+    def is_square_attacked(self, pos, attacker_color):
+        for r in range(8):
+            for c in range(8):
+                p = self.board[r][c]
+                if p and p.color == attacker_color:
+                # Xử lý đặc biệt cho Vua để tránh đệ quy vô hạn
+                    if isinstance(p, King):
+                    # Gọi get_moves với cờ đặc biệt để chỉ lấy các nước đi cơ bản
+                        if pos in p.get_moves(self, r, c, _is_checking_attack=True):
+                            return True
+                    else:
+                        if pos in p.get_moves(self, r, c):
+                            return True
+        return False
+    
     def is_in_check(self, color):
         # Kiểm tra xem màu chỉ định có bị chiếu (có bị đe dọa bởi quân địch) không
         pos = self.get_king_position(color)
         if pos is None:
             return True
         enemy = 'black' if color=='white' else 'white'
-        for r in range(8):
-            for c in range(8):
-                p = self.board[r][c]
-                if p and p.color == enemy:
-                    if pos in p.get_moves(self, r, c):
-                        return True
-        return False
+        return self.is_square_attacked(pos, enemy)
     
     def move_piece(self, move):
         # Thực hiện di chuyển (và phong cấp nếu pawn tới cuối bàn)
         (r1,c1), (r2,c2) = move # xuất phát và đích
         p = self.board[r1][c1]
+        
+        # Đánh dấu quân cờ đã di chuyển
+        p.has_moved = True
+        
+        # Xử lý nhập thành
+        if isinstance(p, King) and abs(c1 - c2) == 2:
+            # Di chuyển Vua
+            self.board[r2][c2] = p
+            self.board[r1][c1] = None
+            # Di chuyển Xe
+            if c2 > c1: # Nhập thành cánh Vua (phải)
+                rook = self.board[r1][7]
+                rook.has_moved = True
+                self.board[r1][5] = rook
+                self.board[r1][7] = None
+            else: # Nhập thành cánh Hậu (trái)
+                rook = self.board[r1][0]
+                rook.has_moved = True
+                self.board[r1][3] = rook
+                self.board[r1][0] = None
+                
         # Phong cấp pawn
-        if isinstance(p, Pawn) and (r2 == 0 or r2 == 7):
+        elif isinstance(p, Pawn) and (r2 == 0 or r2 == 7):
             self.board[r2][c2] = Queen(p.color)
             self.board[r1][c1] = None
-        else:
+        else: # Di chuyển bình thường
             self.board[r2][c2] = p
             self.board[r1][c1] = None
     def get_all_moves(self, color):
