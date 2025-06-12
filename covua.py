@@ -14,6 +14,7 @@ running = True
 class Piece: 
     def __init__ (self, color):
         self.color = color 
+
 class Pawn(Piece): 
     def __init__(self, color):
         super().__init__(color)
@@ -39,6 +40,95 @@ class Pawn(Piece):
                 if target and target.color == enemy:
                     moves.append((nr, nc))
         return moves
+    
+class Rook(Piece):
+    def __init__(self, color):
+        super().__init__(color)
+        
+    def get_moves(self, board, r, c):
+        moves = []
+        # Đi theo 4 hướng: lên, xuống, trái, phải
+        dirs = [(-1,0),(1,0),(0,-1),(0,1)]
+        for dr, dc in dirs:
+            nr, nc = r+dr, c+dc
+            while 0 <= nr < 8 and 0 <= nc < 8:
+                if board.board[nr][nc] is None:
+                    moves.append((nr, nc))
+                else:
+                    if board.board[nr][nc].color != self.color:
+                        moves.append((nr, nc))
+                    break
+                nr += dr; nc += dc
+        return moves
+    
+class Knight(Piece):
+    def __init__(self, color):
+        super().__init__(color)
+    def get_moves(self, board, r, c):
+        moves = []
+        # 8 nước có thể của mã
+        offsets = [(-2,-1),(-2,1),(-1,-2),(-1,2),(1,-2),(1,2),(2,-1),(2,1)]
+        for dr, dc in offsets:
+            nr, nc = r+dr, c+dc
+            if 0 <= nr < 8 and 0 <= nc < 8:
+                target = board.board[nr][nc]
+                if target is None or target.color != self.color:
+                    moves.append((nr, nc))
+        return moves
+    
+class Bishop (Piece):
+    def __init__(self,color):
+        super().__init__(color)
+    def get_moves(self, board, r, c):
+        moves = []
+        dirs = [(1,1),(1,-1),(-1,1),(-1,-1)]
+        for dr, dc in dirs:
+            nr, nc = r+dr, c+dc
+            while 0 <= nr < 8 and 0 <= nc < 8:
+                if board.board[nr][nc] is None:
+                    moves.append((nr, nc))
+                else:
+                    if board.board[nr][nc].color != self.color:
+                        moves.append((nr, nc))
+                    break
+                nr += dr; nc += dc
+        return moves
+class King(Piece):
+    def __init__(self, color):
+        super().__init__(color)
+        
+    def get_moves(self, board, r, c):
+        moves = []
+        # Vua đi 1 ô mọi hướng  tính nhập thành)
+        dirs = [(-1, 0), (1, 0), (0, -1), (0, 1), (-1, -1), (-1, 1), (1, -1), (1, 1)]
+        
+        for dr, dc in dirs:
+            nr, nc = r+dr, c+dc
+            if 0 <= nr < 8 and 0 <= nc < 8:
+                target = board.board[nr][nc]
+                if target is None or target.color != self.color:
+                    moves.append((nr, nc))
+            
+        return moves
+
+class Queen (Piece):
+    def __init__ (self,color):
+        super(). __init__(color)
+    def get_moves(self, board, r,c):
+        moves = []
+        dirs = [(1,1),(1,-1),(-1,1),(-1,-1),(-1,0),(1,0),(0,-1),(0,1)]
+        for dr,dc in dirs:
+            nr,nc = r+dr, c+dc
+            while 0 <= nr < 8 and 0 <= nc < 8:
+                if board.board[nr][nc] is None:
+                    moves.append((nr, nc))
+                else:
+                    if board.board[nr][nc].color != self.color:
+                        moves.append((nr, nc))
+                    break
+                nr += dr; nc += dc
+        return moves       
+    
 class Board: 
     def __init__ (self):
         self.board = [[None for _ in range(8)] for _ in  range(8)]
@@ -265,93 +355,7 @@ class Board:
             score += 0.6
         return score
                         
-class Rook(Piece):
-    def __init__(self, color):
-        super().__init__(color)
-        
-    def get_moves(self, board, r, c):
-        moves = []
-        # Đi theo 4 hướng: lên, xuống, trái, phải
-        dirs = [(-1,0),(1,0),(0,-1),(0,1)]
-        for dr, dc in dirs:
-            nr, nc = r+dr, c+dc
-            while 0 <= nr < 8 and 0 <= nc < 8:
-                if board.board[nr][nc] is None:
-                    moves.append((nr, nc))
-                else:
-                    if board.board[nr][nc].color != self.color:
-                        moves.append((nr, nc))
-                    break
-                nr += dr; nc += dc
-        return moves
-    
-class Knight(Piece):
-    def __init__(self, color):
-        super().__init__(color)
-    def get_moves(self, board, r, c):
-        moves = []
-        # 8 nước có thể của mã
-        offsets = [(-2,-1),(-2,1),(-1,-2),(-1,2),(1,-2),(1,2),(2,-1),(2,1)]
-        for dr, dc in offsets:
-            nr, nc = r+dr, c+dc
-            if 0 <= nr < 8 and 0 <= nc < 8:
-                target = board.board[nr][nc]
-                if target is None or target.color != self.color:
-                    moves.append((nr, nc))
-        return moves
-    
-class Bishop (Piece):
-    def __init__(self,color):
-        super().__init__(color)
-    def get_moves(self, board, r, c):
-        moves = []
-        dirs = [(1,1),(1,-1),(-1,1),(-1,-1)]
-        for dr, dc in dirs:
-            nr, nc = r+dr, c+dc
-            while 0 <= nr < 8 and 0 <= nc < 8:
-                if board.board[nr][nc] is None:
-                    moves.append((nr, nc))
-                else:
-                    if board.board[nr][nc].color != self.color:
-                        moves.append((nr, nc))
-                    break
-                nr += dr; nc += dc
-        return moves
-class King(Piece):
-    def __init__(self, color):
-        super().__init__(color)
-        
-    def get_moves(self, board, r, c):
-        moves = []
-        # Vua đi 1 ô mọi hướng  tính nhập thành)
-        dirs = [(-1, 0), (1, 0), (0, -1), (0, 1), (-1, -1), (-1, 1), (1, -1), (1, 1)]
-        
-        for dr, dc in dirs:
-            nr, nc = r+dr, c+dc
-            if 0 <= nr < 8 and 0 <= nc < 8:
-                target = board.board[nr][nc]
-                if target is None or target.color != self.color:
-                    moves.append((nr, nc))
-            
-        return moves
 
-class Queen (Piece):
-    def __init__ (self,color):
-        super(). __init__(color)
-    def get_moves(self, board, r,c):
-        moves = []
-        dirs = [(1,1),(1,-1),(-1,1),(-1,-1),(-1,0),(1,0),(0,-1),(0,1)]
-        for dr,dc in dirs:
-            nr,nc = r+dr, c+dc
-            while 0 <= nr < 8 and 0 <= nc < 8:
-                if board.board[nr][nc] is None:
-                    moves.append((nr, nc))
-                else:
-                    if board.board[nr][nc].color != self.color:
-                        moves.append((nr, nc))
-                    break
-                nr += dr; nc += dc
-        return moves   
 
 import math
 def minimax(board, depth, alpha, beta, maximizing):
@@ -407,12 +411,12 @@ HEIGHT = 640
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Chess with AI")
 font = pygame.font.SysFont(None, 40)
-WHITE = (232,232,232); BLACK = (255, 182, 193)
+WHITE = (232,232,232); BLACK = (139, 69, 19)
 # Biến đồng hồ
 font = pygame.font.SysFont(None, 40)
 font_1 = pygame.font.SysFont(None, 100)
 # Thời gian giới hạn (5 phút)
-time_limit = 1 * 60 * 1000  # Giới hạn thời gian 5 phút (5 * 60 giây * 1000 milliseconds)
+time_limit = 10 * 60 * 1000  # Giới hạn thời gian 5 phút (5 * 60 giây * 1000 milliseconds)
 start_time = pygame.time.get_ticks()  # Thời gian bắt đầu
 
 turn = 'white'
@@ -436,7 +440,6 @@ def draw_board():
             if p:
                 # Xác định ký hiệu quân
                 if isinstance(p, Pawn):
-                    # Xác định tệp hình ảnh của quân Pawn
                     image_file = f"images/{'white' if p.color == 'white' else 'black'}_pawn.png"
                 elif isinstance(p, Knight): 
                     image_file = f"images/{'white' if p.color == 'white' else 'black'}_knight.png"
@@ -449,9 +452,24 @@ def draw_board():
                 elif isinstance(p, King):   
                     image_file = f"images/{'white' if p.color == 'white' else 'black'}_king.png"
                 
-                piece_image = pygame.image.load(image_file).convert_alpha()  
-                piece_image = pygame.transform.scale(piece_image, (square, square))
-                screen.blit(piece_image, rect)  
+                piece_image = pygame.image.load(image_file).convert_alpha()
+                
+                # Scale quân tốt nhỏ lại còn 70%
+                if isinstance(p, Pawn):
+                    piece_image = pygame.transform.scale(piece_image, (int(square * 0.7), int(square * 0.7)))
+                    offset_x = (square - piece_image.get_width()) // 2
+                    offset_y = (square - piece_image.get_height()) // 2
+                else:
+                    piece_image = pygame.transform.scale(piece_image, (square, square))
+                    offset_x = offset_y = 0
+                
+                # Render đổ bóng cho quân cờ (khớp hình dạng)
+                shadow = piece_image.copy()
+                shadow.fill((0, 0, 0, 100), special_flags=pygame.BLEND_RGBA_MULT)  # Tạo bóng với độ trong suốt
+                screen.blit(shadow, (rect.x + offset_x + 5, rect.y + offset_y + 5))  # Đổ bóng lệch 5px
+                
+                # Vẽ quân cờ
+                screen.blit(piece_image, (rect.x + offset_x, rect.y + offset_y))
     # Nếu vua bị chiếu, vẽ viền đỏ quanh ô vua
     white_king_pos = board.get_king_position('white')
     black_king_pos = board.get_king_position('black')
@@ -501,7 +519,7 @@ def display_lose_message():
     screen.blit(quit_text, ((WIDTH-160) // 2 - quit_text.get_width() // 2, HEIGHT // 2 + 80))
 def display_choose_color_screen():
     # Màn hình chọn màu
-    screen.fill((255, 182, 193))  # Nền hồng cho màn hình chọn màu
+    screen.fill((173, 216, 230))  # Nền hồng cho màn hình chọn màu
 
     # Hiển thị thông báo yêu cầu người chơi chọn phe
     choose_text = font_1.render("Choose Your Color", True, (255,255,255))
@@ -522,7 +540,7 @@ def display_choose_color_screen():
     pygame.display.flip()   
 # Vẽ màn hình chọn mức độ
 def display_choose_difficulty_screen():
-    screen.fill((255, 182, 193))  # Nền hồng cho màn hình chọn mức độ
+    screen.fill((173, 216, 230))  # Nền hồng cho màn hình chọn mức độ
 
     choose_text = font_1.render("Choose Your Difficulty", True, (255, 255, 255))
     screen.blit(choose_text, (WIDTH // 2 - choose_text.get_width() // 2, HEIGHT // 3 - choose_text.get_height() // 2))
@@ -674,11 +692,27 @@ while running:
         # Hiển thị thời gian đã trôi qua (Tính bằng phút:giây)
         elapsed_minutes = elapsed_time // 60000  # Tính phút
         elapsed_seconds = (elapsed_time % 60000) // 1000  # Tính giây
-        time_text = f"Time: {elapsed_minutes:02}:{elapsed_seconds:02}"
-        
-        # Hiển thị thời giqqqan ngoài màn hình (ở khu vực bên phải)
-        time_surface = font.render(time_text, True, (255, 255, 255))
-        screen.blit(time_surface, (WIDTH - 160, 20))  # Hiển thị thời gian ở góc trên bên phải của khu vực hiển thị
+        time_text_1 = "Elapsed:"  # Dòng 1
+        time_text_2 = f"{elapsed_minutes:02}:{elapsed_seconds:02}"  # Dòng 2
+
+        # Hiển thị giới hạn thời gian (Tính bằng phút:giây)
+        limit_minutes = time_limit // 60000  # Tính phút
+        limit_seconds = (time_limit % 60000) // 1000  # Tính giây
+        limit_text_1 = "Time Limit:"  # Dòng 1
+        limit_text_2 = f"{limit_minutes:02}:{limit_seconds:02}"  # Dòng 2
+
+        # Hiển thị thời gian đã trôi qua
+        time_surface_1 = font.render(time_text_1, True, (255, 255, 255))
+        time_surface_2 = font.render(time_text_2, True, (255, 255, 255))
+        screen.blit(time_surface_1, (WIDTH - 150, 20))  # Dòng 1
+        screen.blit(time_surface_2, (WIDTH - 150, 50))  # Dòng 2
+
+        # Hiển thị giới hạn thời gian
+        limit_surface_1 = font.render(limit_text_1, True, (255, 255, 255))
+        limit_surface_2 = font.render(limit_text_2, True, (255, 255, 255))
+        screen.blit(limit_surface_1, (WIDTH - 150, 90))  # Dòng 1
+        screen.blit(limit_surface_2, (WIDTH - 150, 120))  # Dòng 2
+
         if game_over:
             # Hiển thị lựa chọn "Chơi lại" hoặc "Thoát"
             restart_rect = pygame.Rect((WIDTH -160) // 2 - 100, HEIGHT // 2, 200, 50)
